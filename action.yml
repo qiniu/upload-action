@@ -1,0 +1,60 @@
+name: Upload Qiniu Artifacts
+description: 'An Github action could help to upload artifacts to qiniu'
+author: Qiniu
+inputs:
+  bucket:
+    description: 'Qiniu bucket name'
+    required: true
+    type: string
+  access_key:
+    description: 'Qiniu access key'
+    required: true
+    type: string
+  secret_key:
+    description: 'Qiniu secret key'
+    required: true
+    type: string
+  prefix:
+    description: 'Remote path prefix'
+    default: ''
+    type: string
+  file_type:
+    description: 'Qiniu file type'
+    default: 0
+    type: number
+  overwrite:
+    description: >
+      If true, an artifact will overwrite artifacts with the same name.
+      If false, the action will fail if an artifact for the given name already exists.
+      Does not fail if the artifact does not exist.
+    default: true
+    type: boolean
+  concurrency:
+    description: 'Number of concurrent file uploads'
+    default: 10
+    type: number
+  multipart_upload_part_size:
+    description: 'Size of each part of a multipart upload'
+    default: 4194304
+    type: number
+  multipart_upload_threshold:
+    description: 'Minimum size of a file before it is uploaded via multipart upload'
+    default: 4194304
+    type: number
+  bucket_urls:
+    description: 'Qiniu bucket service url'
+    type: string
+  up_urls:
+    description: 'Qiniu up service urls'
+    type: string
+  use_insecure_protocol:
+    description: 'Use HTTP protocol'
+    default: false
+    type: boolean
+  artifacts:
+    description: 'Files glob to archive'
+    required: 'true'
+    type: string
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

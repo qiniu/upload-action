@@ -1,0 +1,22 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "extends": "standard-with-typescript",
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "rules": {},
+    "overrides": [
+        {
+            "files": [
+                "tests/**/*"
+            ],
+            "env": {
+                "jest": true
+            }
+        }
+    ]
+}
