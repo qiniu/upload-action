@@ -1,0 +1,44 @@
+name: Real Action Test
+on: [push, pull_request]
+jobs:
+  action-test:
+    strategy:
+      matrix:
+        os: [ubuntu, macos, windows]
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare for tempdata
+        run: |
+          set -e
+          mkdir tempdata
+          mkdir tempdata/subdir1
+          mkdir tempdata/subdir2
+          dd if=/dev/urandom of=tempdata/1K bs=1K count=1
+          dd if=/dev/urandom of=tempdata/1M bs=1M count=1
+          dd if=/dev/urandom of=tempdata/2M bs=2M count=1
+          dd if=/dev/urandom of=tempdata/5M bs=5M count=1
+          dd if=/dev/urandom of=tempdata/10M bs=10M count=1
+          dd if=/dev/urandom of=tempdata/subdir1/1K bs=1K count=1
+          dd if=/dev/urandom of=tempdata/subdir1/1M bs=1M count=1
+          dd if=/dev/urandom of=tempdata/subdir1/2M bs=2M count=1
+          dd if=/dev/urandom of=tempdata/subdir1/5M bs=5M count=1
+          dd if=/dev/urandom of=tempdata/subdir1/10M bs=10M count=1
+          dd if=/dev/urandom of=tempdata/subdir2/1K bs=1K count=1
+          dd if=/dev/urandom of=tempdata/subdir2/1M bs=1M count=1
+          dd if=/dev/urandom of=tempdata/subdir2/2M bs=2M count=1
+          dd if=/dev/urandom of=tempdata/subdir2/5M bs=5M count=1
+          dd if=/dev/urandom of=tempdata/subdir2/10M bs=10M count=1
+        shell: bash
+      - name: Run action
+        uses: ./
+        with:
+          bucket: "${{ secrets.QINIU_BUCKET }}"
+          access_key: "${{ secrets.QINIU_ACCESS_KEY }}"
+          secret_key: "${{ secrets.QINIU_SECRET_KEY }}"
+          prefix: "${{ secrets.QINIU_BUCKET_PREFIX }}action-${{ matrix.os }}/"
+          file_type: 4
+          concurrency: 10
+          artifacts: |
+            tempdata/**/*
+            !tempdata/**/1K

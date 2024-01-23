@@ -1,13 +1,15 @@
 name: Simple Upload Test
 on: [push, pull_request]
 jobs:
-  upload-linux-test:
-    name: Simple Upload Test on Linux
-    runs-on: ubuntu-latest
+  upload-test:
+    strategy:
+      matrix:
+        os: [ubuntu, macos, windows]
+    runs-on: ${{ matrix.os }}-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup NodeJS
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
       - name: Setup dependencies
@@ -15,43 +17,7 @@ jobs:
       - name: Run checks
         run: npm run check-all
         env:
-          QINIU_ACCESS_KEY: ${{ secrets.QINIU_ACCESS_KEY }}
-          QINIU_SECRET_KEY: ${{ secrets.QINIU_SECRET_KEY }}
-          QINIU_BUCKET: ${{ secrets.QINIU_BUCKET }}
-          QINIU_BUCKET_PREFIX: ${{ secrets.QINIU_BUCKET_PREFIX }}
-  upload-macos-test:
-    name: Simple Upload Test on MacOS
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup NodeJS
-        uses: actions/setup-node@v2
-        with:
-          node-version: '20'
-      - name: Setup dependencies
-        run: npm install
-      - name: Run checks
-        run: npm run check-all
-        env:
-          QINIU_ACCESS_KEY: ${{ secrets.QINIU_ACCESS_KEY }}
-          QINIU_SECRET_KEY: ${{ secrets.QINIU_SECRET_KEY }}
-          QINIU_BUCKET: ${{ secrets.QINIU_BUCKET }}
-          QINIU_BUCKET_PREFIX: ${{ secrets.QINIU_BUCKET_PREFIX }}
-  upload-windows-test:
-    name: Simple Upload Test on Windows
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup NodeJS
-        uses: actions/setup-node@v2
-        with:
-          node-version: '20'
-      - name: Setup dependencies
-        run: npm install
-      - name: Run checks
-        run: npm run check-all
-        env:
-          QINIU_ACCESS_KEY: ${{ secrets.QINIU_ACCESS_KEY }}
-          QINIU_SECRET_KEY: ${{ secrets.QINIU_SECRET_KEY }}
-          QINIU_BUCKET: ${{ secrets.QINIU_BUCKET }}
-          QINIU_BUCKET_PREFIX: ${{ secrets.QINIU_BUCKET_PREFIX }}
+          QINIU_ACCESS_KEY: "${{ secrets.QINIU_ACCESS_KEY }}"
+          QINIU_SECRET_KEY: "${{ secrets.QINIU_SECRET_KEY }}"
+          QINIU_BUCKET: "${{ secrets.QINIU_BUCKET }}"
+          QINIU_BUCKET_PREFIX: "${{ secrets.QINIU_BUCKET_PREFIX }}${{ matrix.os }}/"

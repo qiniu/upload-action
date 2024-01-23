@@ -49,7 +49,7 @@ export interface Inputs {
   // Minimum size of a file before it is uploaded via multipart upload
   multipartUploadThreshold: number
 
-  // multipart upload api version
+  // Multipart upload API version
   multipartUploadApiVersion: number
 
   // Bucket URLs
