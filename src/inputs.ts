@@ -10,9 +10,8 @@ export enum InputsFieldNames {
   Concurrency = 'concurrency',
   MultipartUploadPartSize = 'multipart_upload_part_size',
   MultipartUploadThreshold = 'multipart_upload_threshold',
-  MultipartUploadApiVersion = 'multipart_upload_api_version',
-  BucketUrls = 'bucket_urls',
-  UpUrls = 'up_urls',
+  BucketHosts = 'bucket_hosts',
+  UploadHosts = 'upload_hosts',
   UseInsecureProtocol = 'use_insecure_protocol',
   Artifacts = 'artifacts',
 }
@@ -49,14 +48,11 @@ export interface Inputs {
   // Minimum size of a file before it is uploaded via multipart upload
   multipartUploadThreshold: number
 
-  // Multipart upload API version
-  multipartUploadApiVersion: number
+  // Bucket service Hosts
+  bucketHosts: string[]
 
-  // Bucket URLs
-  bucketUrls: string[]
-
-  // Qiniu zone
-  zone?: qiniu.conf.Zone
+  // Qiniu regions
+  region?: qiniu.httpc.RegionsProvider
 
   // Use HTTP protocol
   useInsecureProtocol: boolean

@@ -16,7 +16,6 @@ interface UploadProperties {
   overwrite: boolean
   multipartUploadPartSize: number
   multipartUploadThreshold: number
-  multipartUploadApiVersion: number
   config: qiniu.conf.Config
   mac: qiniu.auth.digest.Mac
 }
@@ -48,7 +47,6 @@ export async function uploadGlobs (inputs: Inputs, config: qiniu.conf.Config): P
         overwrite: inputs.overwrite,
         multipartUploadPartSize: inputs.multipartUploadPartSize,
         multipartUploadThreshold: inputs.multipartUploadThreshold,
-        multipartUploadApiVersion: inputs.multipartUploadApiVersion,
         config
       })
     } finally {
@@ -91,7 +89,7 @@ async function doUploadByMultiparts (task: UploadTask, properties: UploadPropert
       fname: path.basename(task.localFile),
       params: {},
       partSize: properties.multipartUploadPartSize,
-      version: properties.multipartUploadApiVersion === 1 ? 'v1' : 'v2'
+      version: 'v2'
     },
     () => {}
   )

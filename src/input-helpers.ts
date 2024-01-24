@@ -12,15 +12,31 @@ export function getInputs (): Inputs {
   const concurrency = parseInt(core.getInput(InputsFieldNames.Concurrency))
   const multipartUploadPartSize = parseInt(core.getInput(InputsFieldNames.MultipartUploadPartSize))
   const multipartUploadThreshold = parseInt(core.getInput(InputsFieldNames.MultipartUploadThreshold))
-  const multipartUploadApiVersion = parseInt(core.getInput(InputsFieldNames.MultipartUploadApiVersion))
-  const bucketUrls = core.getMultilineInput(InputsFieldNames.BucketUrls)
-  const upUrls = core.getMultilineInput(InputsFieldNames.UpUrls)
+  const bucketHosts = core.getMultilineInput(InputsFieldNames.BucketHosts)
+  const uploadHosts = core.getMultilineInput(InputsFieldNames.UploadHosts)
   const useInsecureProtocol = core.getBooleanInput(InputsFieldNames.UseInsecureProtocol)
   const artifacts = core.getMultilineInput(InputsFieldNames.Artifacts)
 
-  let zone: qiniu.conf.Zone | undefined
-  if (upUrls.length > 0) {
-    zone = new qiniu.conf.Zone(upUrls)
+  for (const host of bucketHosts) {
+    if (host.includes('://')) {
+      core.setFailed(`Invalid bucket host: ${host}`)
+    }
+  }
+  for (const host of uploadHosts) {
+    if (host.includes('://')) {
+      core.setFailed(`Invalid upload host: ${host}`)
+    }
+  }
+
+  let region: qiniu.httpc.RegionsProvider | undefined
+  if (uploadHosts.length > 0) {
+    region = new qiniu.httpc.StaticRegionsProvider([
+      new qiniu.httpc.Region({
+        services: {
+          up: uploadHosts.map(host => new qiniu.httpc.Endpoint(host, { defaultScheme: useInsecureProtocol ? 'http' : 'https' }))
+        }
+      })
+    ])
   }
 
   if (isNaN(fileType)) {
@@ -31,9 +47,6 @@ export function getInputs (): Inputs {
   }
   if (isNaN(multipartUploadPartSize)) {
     core.setFailed(`Invalid multipart_upload_part_size: ${core.getInput(InputsFieldNames.MultipartUploadPartSize)}`)
-  }
-  if (isNaN(multipartUploadThreshold) || (multipartUploadApiVersion !== 1 && multipartUploadApiVersion !== 2)) {
-    core.setFailed(`Invalid multipart_upload_threshold: ${core.getInput(InputsFieldNames.MultipartUploadThreshold)}`)
   }
 
   return {
@@ -46,9 +59,8 @@ export function getInputs (): Inputs {
     concurrency,
     multipartUploadPartSize,
     multipartUploadThreshold,
-    multipartUploadApiVersion,
-    bucketUrls,
-    zone,
+    bucketHosts,
+    region,
     useInsecureProtocol,
     artifacts
   }

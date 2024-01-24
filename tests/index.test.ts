@@ -38,8 +38,8 @@ test('upload files', async () => {
     }), fs.createWriteStream(filePath))
   }
 
-  const listQiniuPrefix = async function (mac: qiniu.auth.digest.Mac, bucket: string, prefix: string): Promise<string[]> {
-    const bucketManager = new qiniu.rs.BucketManager(mac)
+  const listQiniuPrefix = async function (mac: qiniu.auth.digest.Mac, config: qiniu.conf.Config, bucket: string, prefix: string): Promise<string[]> {
+    const bucketManager = new qiniu.rs.BucketManager(mac, config)
     type listCallback = (e?: Error, keys?: string[]) => void
     const listNextPage = function (marker: string, callback: listCallback): void {
       bucketManager.listPrefix(bucket, { prefix, marker, limit: 1000 }, (error, body, respInfo) => {
@@ -73,8 +73,8 @@ test('upload files', async () => {
     })
   }
 
-  const cleanQiniuPrefix = async function (mac: qiniu.auth.digest.Mac, bucket: string, allKeys: string[]): Promise<void> {
-    const bucketManager = new qiniu.rs.BucketManager(mac)
+  const cleanQiniuPrefix = async function (mac: qiniu.auth.digest.Mac, config: qiniu.conf.Config, bucket: string, allKeys: string[]): Promise<void> {
+    const bucketManager = new qiniu.rs.BucketManager(mac, config)
     const deleteAllKeys = async function (keys: string[]): Promise<unknown> {
       return await new Promise((resolve, reject) => {
         const deleteOperations = keys.map(key => qiniu.rs.deleteOp(bucket, key))
@@ -108,6 +108,8 @@ test('upload files', async () => {
   const prefix = process.env['QINIU_BUCKET_PREFIX'] ?? ''
   const mac = new qiniu.auth.digest.Mac(accessKey, secretKey)
 
+  const config = new qiniu.conf.Config()
+
   try {
     await fsPromises.mkdir(tmpDirPath, { recursive: true })
     process.chdir(tmpDirPath)
@@ -131,12 +133,11 @@ test('upload files', async () => {
       concurrency: 10,
       multipartUploadPartSize: 4 * 1024 * 1024,
       multipartUploadThreshold: 4 * 1024 * 1024,
-      multipartUploadApiVersion: 2,
-      bucketUrls: [],
+      bucketHosts: [],
       useInsecureProtocol: false,
       artifacts: ['**/*']
-    }, new qiniu.conf.Config())
-    const allKeys = await listQiniuPrefix(mac, bucket, prefix)
+    }, config)
+    const allKeys = await listQiniuPrefix(mac, config, bucket, prefix)
     expect(allKeys).toContain(path.posix.join(prefix, '1M'))
     expect(allKeys).toContain(path.posix.join(prefix, '2M'))
     expect(allKeys).toContain(path.posix.join(prefix, '5M'))
@@ -145,9 +146,9 @@ test('upload files', async () => {
     expect(allKeys).toContain(path.posix.join(prefix, 'subdir', '2M'))
     expect(allKeys).toContain(path.posix.join(prefix, 'subdir', '5M'))
     expect(allKeys).toContain(path.posix.join(prefix, 'subdir', '10M'))
-    await cleanQiniuPrefix(mac, bucket, allKeys)
+    await cleanQiniuPrefix(mac, config, bucket, allKeys)
   } catch {
-    await cleanQiniuPrefix(mac, bucket, await listQiniuPrefix(mac, bucket, prefix))
+    await cleanQiniuPrefix(mac, config, bucket, await listQiniuPrefix(mac, config, bucket, prefix))
   } finally {
     process.chdir(cwd)
     await fsPromises.rm(tmpDirPath, { recursive: true })

@@ -41,15 +41,11 @@ inputs:
     description: 'Minimum size of a file before it is uploaded via multipart upload'
     default: 4194304
     type: number
-  multipart_upload_api_version:
-    description: 'Multipart upload API version'
-    default: 2
-    type: number
-  bucket_urls:
-    description: 'Qiniu bucket service URLs'
+  bucket_hosts:
+    description: 'Qiniu bucket service hosts'
     type: string
-  up_urls:
-    description: 'Qiniu up service URLs'
+  upload_hosts:
+    description: 'Qiniu upload service hosts'
     type: string
   use_insecure_protocol:
     description: 'Use HTTP protocol'
