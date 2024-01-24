@@ -49951,28 +49951,40 @@ async function uploadGlobs(inputs, config) {
     }
     const localFiles = await (0, glob_1.glob)(includeArtifacts, { ignore: excludeArtifacts, nodir: true });
     const semaphore = new semaphore_promise_1.Semaphore(inputs.concurrency);
-    await Promise.all(localFiles.map(async (localFile) => {
+    const restPromises = new Set();
+    let error;
+    for (const localFile of localFiles) {
         const release = await semaphore.acquire();
-        try {
-            let posixLocalFile = localFile;
-            if (path.delimiter !== path.posix.delimiter) {
-                posixLocalFile = localFile.split(path.delimiter).join(path.posix.delimiter);
+        let posixLocalFile = localFile;
+        if (path.delimiter !== path.posix.delimiter) {
+            posixLocalFile = localFile.split(path.delimiter).join(path.posix.delimiter);
+        }
+        const remoteFile = inputs.prefix + posixLocalFile;
+        const p = doUploadTask({ localFile, remoteFile }, {
+            bucket: inputs.bucket,
+            mac: new qiniu.auth.digest.Mac(inputs.accessKey, inputs.secretKey),
+            fileType: inputs.fileType,
+            overwrite: inputs.overwrite,
+            multipartUploadPartSize: inputs.multipartUploadPartSize,
+            multipartUploadThreshold: inputs.multipartUploadThreshold,
+            config
+        });
+        restPromises.add(p);
+        p
+            .then(() => {
+            restPromises.delete(p);
+        })
+            .catch(err => {
+            if (error == null) {
+                error = err;
             }
-            const remoteFile = inputs.prefix + posixLocalFile;
-            await doUploadTask({ localFile, remoteFile }, {
-                bucket: inputs.bucket,
-                mac: new qiniu.auth.digest.Mac(inputs.accessKey, inputs.secretKey),
-                fileType: inputs.fileType,
-                overwrite: inputs.overwrite,
-                multipartUploadPartSize: inputs.multipartUploadPartSize,
-                multipartUploadThreshold: inputs.multipartUploadThreshold,
-                config
-            });
-        }
-        finally {
-            release();
-        }
-    }));
+        })
+            .finally(release);
+    }
+    if (error != null) {
+        throw error;
+    }
+    await Promise.all(restPromises);
 }
 exports.uploadGlobs = uploadGlobs;
 async function doUploadTask(task, properties) {

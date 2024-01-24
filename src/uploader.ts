@@ -21,7 +21,8 @@ interface UploadProperties {
 }
 
 export async function uploadGlobs (inputs: Inputs, config: qiniu.conf.Config): Promise<void> {
-  const includeArtifacts = []; const excludeArtifacts = []
+  const includeArtifacts: string[] = []
+  const excludeArtifacts: string[] = []
 
   for (const artifact of inputs.artifacts) {
     if (artifact.startsWith('!')) {
@@ -32,27 +33,40 @@ export async function uploadGlobs (inputs: Inputs, config: qiniu.conf.Config): P
   }
   const localFiles = await glob(includeArtifacts, { ignore: excludeArtifacts, nodir: true })
   const semaphore = new Semaphore(inputs.concurrency)
-  await Promise.all(localFiles.map(async localFile => {
+  const restPromises = new Set()
+  let error: Error | undefined
+  for (const localFile of localFiles) {
     const release = await semaphore.acquire()
-    try {
-      let posixLocalFile = localFile
-      if (path.delimiter !== path.posix.delimiter) {
-        posixLocalFile = localFile.split(path.delimiter).join(path.posix.delimiter)
-      }
-      const remoteFile = inputs.prefix + posixLocalFile
-      await doUploadTask({ localFile, remoteFile }, {
-        bucket: inputs.bucket,
-        mac: new qiniu.auth.digest.Mac(inputs.accessKey, inputs.secretKey),
-        fileType: inputs.fileType,
-        overwrite: inputs.overwrite,
-        multipartUploadPartSize: inputs.multipartUploadPartSize,
-        multipartUploadThreshold: inputs.multipartUploadThreshold,
-        config
-      })
-    } finally {
-      release()
+    let posixLocalFile = localFile
+    if (path.delimiter !== path.posix.delimiter) {
+      posixLocalFile = localFile.split(path.delimiter).join(path.posix.delimiter)
     }
-  }))
+    const remoteFile = inputs.prefix + posixLocalFile
+    const p = doUploadTask({ localFile, remoteFile }, {
+      bucket: inputs.bucket,
+      mac: new qiniu.auth.digest.Mac(inputs.accessKey, inputs.secretKey),
+      fileType: inputs.fileType,
+      overwrite: inputs.overwrite,
+      multipartUploadPartSize: inputs.multipartUploadPartSize,
+      multipartUploadThreshold: inputs.multipartUploadThreshold,
+      config
+    })
+    restPromises.add(p)
+    p
+      .then(() => {
+        restPromises.delete(p)
+      })
+      .catch(err => {
+        if (error == null) {
+          error = err
+        }
+      })
+      .finally(release)
+  }
+  if (error != null) {
+    throw error
+  }
+  await Promise.all(restPromises)
 }
 
 async function doUploadTask (task: UploadTask, properties: UploadProperties): Promise<void> {
