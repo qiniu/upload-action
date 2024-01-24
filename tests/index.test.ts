@@ -12,7 +12,7 @@ import * as qiniu from 'qiniu'
 jest.mock('@actions/core')
 
 test('upload files', async () => {
-  const randomToFile = async function (filePath: string, size: number = Number.POSITIVE_INFINITY): Promise<void> {
+  const randomToFile = async function (filePath: string, size: number): Promise<void> {
     let producedSize = 0
     await pipeline(new ReadableStream({
       read (readSize) {

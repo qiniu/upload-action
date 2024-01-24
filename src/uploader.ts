@@ -3,7 +3,7 @@ import { type Inputs } from './inputs'
 import { glob } from 'glob'
 import { Semaphore } from 'semaphore-promise'
 import * as fs from 'node:fs/promises'
-import * as path from 'path'
+import * as path from 'node:path'
 
 interface UploadTask {
   localFile: string

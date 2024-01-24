@@ -49750,13 +49750,17 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const qiniu = __importStar(__nccwpck_require__(1967));
 const input_helpers_1 = __nccwpck_require__(8633);
 const uploader_1 = __nccwpck_require__(5168);
+const package_json_1 = __importDefault(__nccwpck_require__(4147));
 async function run() {
     const inputs = (0, input_helpers_1.getInputs)();
-    qiniu.conf.USER_AGENT += ' QiniuUploadAction/v0.1.0';
+    qiniu.conf.USER_AGENT += ` QiniuUploadAction/v${package_json_1.default.version}`;
     if (inputs.bucketHosts.length > 0) {
         qiniu.conf.QUERY_REGION_HOST = inputs.bucketHosts[0];
         if (inputs.bucketHosts.length > 1) {
@@ -49821,13 +49825,14 @@ function getInputs() {
     const uploadHosts = core.getMultilineInput(inputs_1.InputsFieldNames.UploadHosts);
     const useInsecureProtocol = core.getBooleanInput(inputs_1.InputsFieldNames.UseInsecureProtocol);
     const artifacts = core.getMultilineInput(inputs_1.InputsFieldNames.Artifacts);
+    const re = /^(([a-zA-Z0-9_-])+(.)?)*(:\d+)?$/;
     for (const host of bucketHosts) {
-        if (host.includes('://')) {
+        if (!re.test(host)) {
             core.setFailed(`Invalid bucket host: ${host}`);
         }
     }
     for (const host of uploadHosts) {
-        if (host.includes('://')) {
+        if (!re.test(host)) {
             core.setFailed(`Invalid upload host: ${host}`);
         }
     }
@@ -49932,7 +49937,7 @@ const qiniu = __importStar(__nccwpck_require__(1967));
 const glob_1 = __nccwpck_require__(8211);
 const semaphore_promise_1 = __nccwpck_require__(9989);
 const fs = __importStar(__nccwpck_require__(3977));
-const path = __importStar(__nccwpck_require__(1017));
+const path = __importStar(__nccwpck_require__(9411));
 async function uploadGlobs(inputs, config) {
     const includeArtifacts = [];
     const excludeArtifacts = [];
@@ -50157,6 +50162,14 @@ module.exports = require("node:events");
 
 "use strict";
 module.exports = require("node:fs/promises");
+
+/***/ }),
+
+/***/ 9411:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:path");
 
 /***/ }),
 
@@ -59736,6 +59749,14 @@ module.exports = JSON.parse('{"100":"Continue","101":"Switching Protocols","102"
 
 "use strict";
 module.exports = JSON.parse('{"name":"urllib","version":"2.41.0","publishConfig":{"tag":"latest-2"},"description":"Help in opening URLs (mostly HTTP) in a complex world — basic and digest authentication, redirections, cookies and more.","keywords":["urllib","http","urlopen","curl","wget","request","https"],"author":"fengmk2 <fengmk2@gmail.com> (https://fengmk2.com)","homepage":"https://github.com/node-modules/urllib","main":"lib/index.js","types":"lib/index.d.ts","files":["lib"],"repository":{"type":"git","url":"git://github.com/node-modules/urllib.git"},"scripts":{"tsd":"node test/tsd.js","test-local":"mocha -t 30000 test/*.test.js","test":"npm run lint && npm run test-local","test-cov":"istanbul cover node_modules/mocha/bin/_mocha -- -t 30000 test/*.test.js","ci":"npm run lint && npm run tsd && npm run test-cov","lint":"jshint .","contributor":"git-contributor"},"dependencies":{"any-promise":"^1.3.0","content-type":"^1.0.2","debug":"^2.6.9","default-user-agent":"^1.0.0","digest-header":"^1.0.0","ee-first":"~1.1.1","formstream":"^1.1.0","humanize-ms":"^1.2.0","iconv-lite":"^0.4.15","ip":"^1.1.5","pump":"^3.0.0","qs":"^6.4.0","statuses":"^1.3.1","utility":"^1.16.1"},"peerDependencies":{"proxy-agent":"^5.0.0"},"peerDependenciesMeta":{"proxy-agent":{"optional":true}},"devDependencies":{"@types/mocha":"^5.2.5","@types/node":"^10.12.18","agentkeepalive":"^4.0.0","benchmark":"^2.1.4","bluebird":"*","busboy":"^0.2.14","co":"*","coffee":"1","egg-ci":"^1.15.0","git-contributor":"^1.0.10","http-proxy":"^1.16.2","istanbul":"*","jshint":"*","mkdirp":"^0.5.1","mocha":"3","muk":"^0.5.3","pedding":"^1.1.0","proxy-agent":"^5.0.0","semver":"5","spy":"^1.0.0","tar":"^4.4.8","through2":"^2.0.3","tsd":"^0.18.0","typescript":"^4.4.4"},"engines":{"node":">= 0.10.0"},"ci":{"type":"github","os":{"github":"linux, windows, macos"},"version":"8, 10, 12, 14, 16"},"license":"MIT"}');
+
+/***/ }),
+
+/***/ 4147:
+/***/ ((module) => {
+
+"use strict";
+module.exports = JSON.parse('{"name":"qiniu-upload-action","version":"0.1.0","description":"An Github action could help to upload artifacts to qiniu","main":"dist/index.js","scripts":{"build":"tsc","release":"rm -rf dist && ncc build src/index.ts -C --target es2022 --license LICENSE","check-all":"concurrently \\"npm:lint\\" \\"npm:test\\" \\"npm:build\\"","lint":"eslint **/*.ts","test":"jest --testTimeout 300000"},"devDependencies":{"@jest/globals":"^29.7.0","@types/jest":"^29.5.11","@types/node":"^20.11.5","@typescript-eslint/eslint-plugin":"^6.19.1","@vercel/ncc":"^0.38.1","concurrently":"^8.2.2","eslint":"^8.56.0","eslint-config-standard-with-typescript":"^43.0.1","eslint-plugin-import":"^2.29.1","eslint-plugin-n":"^16.6.2","eslint-plugin-promise":"^6.1.1","jest":"^29.7.0","prettier":"^3.2.4","ts-jest":"^29.1.2","ts-node":"^10.9.2","typescript":"^5.3.3"},"dependencies":{"@actions/core":"^1.10.1","glob":"^10.3.10","qiniu":"^7.11.0","semaphore-promise":"^1.4.2"},"repository":{"type":"git","url":"git+https://github.com/bachue/upload-action.git"},"bugs":{"url":"https://github.com/bachue/upload-action/issues"},"keywords":["Actions","GitHub","Artifacts","Upload","Qiniu"],"author":"sdk@qiniu.com","license":"MIT","engines":{"node":">= 20"}}');
 
 /***/ })
 

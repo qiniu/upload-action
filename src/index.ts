@@ -1,10 +1,11 @@
 import * as qiniu from 'qiniu'
 import { getInputs } from './input-helpers'
 import { uploadGlobs } from './uploader'
+import pkg from '../package.json'
 
 async function run (): Promise<void> {
   const inputs = getInputs()
-  qiniu.conf.USER_AGENT += ' QiniuUploadAction/v0.1.0'
+  qiniu.conf.USER_AGENT += ` QiniuUploadAction/v${pkg.version}`
   if (inputs.bucketHosts.length > 0) {
     (qiniu.conf as any).QUERY_REGION_HOST = inputs.bucketHosts[0]
     if (inputs.bucketHosts.length > 1) {

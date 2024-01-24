@@ -17,13 +17,15 @@ export function getInputs (): Inputs {
   const useInsecureProtocol = core.getBooleanInput(InputsFieldNames.UseInsecureProtocol)
   const artifacts = core.getMultilineInput(InputsFieldNames.Artifacts)
 
+  const re = /^(([a-zA-Z0-9_-])+(.)?)*(:\d+)?$/
+
   for (const host of bucketHosts) {
-    if (host.includes('://')) {
+    if (!re.test(host)) {
       core.setFailed(`Invalid bucket host: ${host}`)
     }
   }
   for (const host of uploadHosts) {
-    if (host.includes('://')) {
+    if (!re.test(host)) {
       core.setFailed(`Invalid upload host: ${host}`)
     }
   }
