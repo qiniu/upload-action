@@ -5,7 +5,7 @@ import pkg from '../package.json'
 
 async function run (): Promise<void> {
   const inputs = getInputs()
-  qiniu.conf.USER_AGENT += ` QiniuUploadAction/v${pkg.version}`
+  qiniu.conf.USER_AGENT = `QiniuUploadAction/v${pkg.version} ${qiniu.conf.USER_AGENT}`
   if (inputs.bucketHosts.length > 0) {
     (qiniu.conf as any).QUERY_REGION_HOST = inputs.bucketHosts[0]
     if (inputs.bucketHosts.length > 1) {
