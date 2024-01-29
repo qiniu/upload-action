@@ -49760,7 +49760,7 @@ const uploader_1 = __nccwpck_require__(5168);
 const package_json_1 = __importDefault(__nccwpck_require__(4147));
 async function run() {
     const inputs = (0, input_helpers_1.getInputs)();
-    qiniu.conf.USER_AGENT += ` QiniuUploadAction/v${package_json_1.default.version}`;
+    qiniu.conf.USER_AGENT = `QiniuUploadAction/v${package_json_1.default.version} ${qiniu.conf.USER_AGENT}`;
     if (inputs.bucketHosts.length > 0) {
         qiniu.conf.QUERY_REGION_HOST = inputs.bucketHosts[0];
         if (inputs.bucketHosts.length > 1) {
@@ -49956,8 +49956,8 @@ async function uploadGlobs(inputs, config) {
     for (const localFile of localFiles) {
         const release = await semaphore.acquire();
         let posixLocalFile = localFile;
-        if (path.delimiter !== path.posix.delimiter) {
-            posixLocalFile = localFile.split(path.delimiter).join(path.posix.delimiter);
+        if (path.sep !== path.posix.sep) {
+            posixLocalFile = localFile.split(path.sep).join(path.posix.sep);
         }
         const remoteFile = inputs.prefix + posixLocalFile;
         const p = doUploadTask({ localFile, remoteFile }, {

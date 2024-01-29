@@ -38,8 +38,8 @@ export async function uploadGlobs (inputs: Inputs, config: qiniu.conf.Config): P
   for (const localFile of localFiles) {
     const release = await semaphore.acquire()
     let posixLocalFile = localFile
-    if (path.delimiter !== path.posix.delimiter) {
-      posixLocalFile = localFile.split(path.delimiter).join(path.posix.delimiter)
+    if (path.sep !== path.posix.sep) {
+      posixLocalFile = localFile.split(path.sep).join(path.posix.sep)
     }
     const remoteFile = inputs.prefix + posixLocalFile
     const p = doUploadTask({ localFile, remoteFile }, {
