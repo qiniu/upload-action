@@ -1,0 +1,56 @@
+{
+  "name": "qiniu-upload-action",
+  "version": "0.1.0",
+  "description": "An Github action could help to upload artifacts to qiniu",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "release": "rm -rf dist && ncc build src/index.ts -C --target es2022 --license LICENSE",
+    "check-all": "concurrently \"npm:lint\" \"npm:test\" \"npm:build\"",
+    "lint": "eslint **/*.ts",
+    "test": "jest --testTimeout 300000"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.11.5",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "@vercel/ncc": "^0.38.1",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.56.0",
+    "eslint-config-standard-with-typescript": "^43.0.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.1.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.4",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "glob": "^10.3.10",
+    "qiniu": "^7.11.0",
+    "semaphore-promise": "^1.4.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bachue/upload-action.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bachue/upload-action/issues"
+  },
+  "keywords": [
+    "Actions",
+    "GitHub",
+    "Artifacts",
+    "Upload",
+    "Qiniu"
+  ],
+  "author": "sdk@qiniu.com",
+  "license": "MIT",
+  "engines": {
+    "node": ">= 20"
+  }
+}
