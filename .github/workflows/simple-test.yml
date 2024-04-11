@@ -1,0 +1,23 @@
+name: Simple Upload Test
+on: [push, pull_request]
+jobs:
+  upload-test:
+    strategy:
+      matrix:
+        os: [ubuntu, macos, windows]
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Setup dependencies
+        run: npm install
+      - name: Run checks
+        run: npm run check-all
+        env:
+          QINIU_ACCESS_KEY: "${{ secrets.QINIU_ACCESS_KEY }}"
+          QINIU_SECRET_KEY: "${{ secrets.QINIU_SECRET_KEY }}"
+          QINIU_BUCKET: "${{ secrets.QINIU_BUCKET }}"
+          QINIU_BUCKET_PREFIX: "${{ secrets.QINIU_BUCKET_PREFIX }}${{ matrix.os }}/"
